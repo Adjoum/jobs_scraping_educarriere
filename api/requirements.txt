@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+python-dateutil
+python-multipart
+psycopg2-binary  # Pour PostgreSQL en production
