@@ -1,4 +1,4 @@
-name: Daily Job ScraperUp
+name: Daily Job Scraper
 
 on:
   schedule:
@@ -9,31 +9,31 @@ on:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-
+    
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
       with:
         fetch-depth: 0  # Récupère tout l'historique pour les commits
-
+      
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
-
+        
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-
+        
     - name: Run scraper
       env:
         API_KEY: ${{ secrets.SCRAPER_API_KEY }}
         #DATABASE_URL: ${{ secrets.DATABASE_URL }}
         RENDER_API_URL: ${{ secrets.RENDER_API_URL }}
       run: |
-        python educarriere_scraper.py
-
+        python scraper/educarriere_scraper.py
+        
     - name: Push scraped data to API
       run: |
         # Cette étape envoie les données scrapées à votre API Render
@@ -45,7 +45,7 @@ jobs:
         else
           echo "No new jobs found today."
         fi
-
+        
     - name: Commit and push if changes
       run: |
         git config --global user.name 'GitHub Actions'
@@ -74,4 +74,4 @@ jobs:
           
           git commit -m "$commit_message"
           git push
-        fi
+        fi      
