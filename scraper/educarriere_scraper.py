@@ -9,9 +9,10 @@ import os
 import sys
 from datetime import datetime
 from sqlalchemy import create_engine, Column, Integer, String, Text, Date, MetaData, Table
-from sqlalchemy.ext.declarative import declarative_base
+#from sqlalchemy.ext.declarative import declarative_base #Importation deprecié
+from sqlalchemy.orm import declarative_base   # Nouvelle façon recommandée
 from sqlalchemy.orm import sessionmaker
-import datetime
+#import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
