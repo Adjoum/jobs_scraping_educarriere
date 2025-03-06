@@ -12,6 +12,9 @@ from sqlalchemy import create_engine, Column, Integer, String, Text, Date, MetaD
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Ajouter le chemin du dossier api au path pour pouvoir importer les modèles
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "api"))
@@ -607,7 +610,7 @@ def update_database(self, new_jobs):
 # Exécution principale
 if __name__ == "__main__":
     # Récupérer la clé API depuis les variables d'environnement pour GitHub Actions
-    api_key = os.environ.get('API_KEY', '28a1724f4b8f2f67f01533f615a622ca')
+    api_key = os.environ.get('SCRAPY_API_KEY')
 
     scraper = EducarriereScraper(api_key)
 

@@ -1,0 +1,21 @@
+# Environnement virtuel
+venv/
+.venv/
+env/
+.env/
+
+# Fichiers Python compilés
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Fichiers de configuration locaux
+.env
+.env.local
+
+# Fichiers IDE
+.idea/
+.vscode/
+
+# Fichiers de données générés
+*.log

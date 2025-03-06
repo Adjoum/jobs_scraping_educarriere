@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 # URL de l'API (à modifier selon votre environnement)
-API_URL = "http://localhost:8000"
+API_URL = "https://jobs-scraping-educarriere.onrender.com" #http://localhost:8000" for local
 
 
 # Fonction pour récupérer les données de l'API

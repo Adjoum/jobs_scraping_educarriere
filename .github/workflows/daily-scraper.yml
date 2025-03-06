@@ -28,9 +28,23 @@ jobs:
 
     - name: Run scraper
       env:
-        API_KEY: ${{ secrets.SCRAPER_API_KEY }}
+        API_KEY: ${{ secrets.SCRAPY_API_KEY }}
+        #DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        RENDER_API_URL: ${{ secrets.RENDER_API_URL }}
       run: |
-        python educarriere_scraper.py
+        python scraper/educarriere_scraper.py
+
+    - name: Push scraped data to API
+      run: |
+        # Cette étape envoie les données scrapées à votre API Render
+        # Si vous utilisez SQLite, vous pouvez ajouter un script pour mettre à jour la base de données distante
+        today=$(date +'%Y-%m-%d')
+        if [ -f "educarriere_data/educarriere_jobs_${today}.json" ]; then
+          echo "Sending new jobs to API..."
+          curl -X POST -H "Content-Type: application/json" -d @"educarriere_data/educarriere_jobs_${today}.json" ${{ secrets.RENDER_API_URL }}/import
+        else
+          echo "No new jobs found today."
+        fi
 
     - name: Commit and push if changes
       run: |

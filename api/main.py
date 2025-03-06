@@ -13,7 +13,7 @@ import os
 # Importer les modèles depuis le fichier models.py
 from api.models import (
     Base, JobOffer, JobOfferResponse, StatsResponse,
-    get_engine, get_session_maker, create_tables
+    get_engine, get_session_maker, create_tables, JobOfferCreate
 )
 
 # Configuration SQLAlchemy
@@ -49,7 +49,7 @@ app = FastAPI(
 # Configurer CORS pour permettre l'accès depuis Streamlit
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # À remplacer par l'URL de votre app Streamlit en production
+    allow_origins=["https://huggingface.co/spaces/Adjoumani/searchjobin-ivorycost"],  # Or "*" (en local) À remplacer par l'URL de votre app Streamlit en production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -230,6 +230,22 @@ def health_check():
     return {"status": "ok", "timestamp": datetime.datetime.now().isoformat()}
 
 
+@app.post("/import")
+async def import_jobs(jobs: List[JobOfferCreate], db: Session = Depends(get_db)):
+    """Importe des nouvelles offres d'emploi dans la base de données"""
+    imported_count = 0
+    for job_data in jobs:
+        # Vérifier si l'offre existe déjà
+        existing = db.query(JobOffer).filter(JobOffer.offer_id == job_data.offer_id).first()
+        if not existing:
+            # Créer une nouvelle offre
+            new_job = JobOffer(**job_data.dict(), date_added=datetime.datetime.now().date())
+            db.add(new_job)
+            imported_count += 1
+
+    # Valider les changements
+    db.commit()
+    return {"status": "success", "imported_count": imported_count}
 # Ajouter des données de test si la base est vide
 #@app.on_event("startup")
 def add_test_data():
