@@ -32,6 +32,7 @@ jobs:
         #DATABASE_URL: ${{ secrets.DATABASE_URL }}
         RENDER_API_URL: ${{ secrets.RENDER_API_URL }}
       run: |
+        export PYTHONPATH=$PYTHONPATH:$(pwd)
         python scraper/educarriere_scraper.py
         
     - name: Push scraped data to API
