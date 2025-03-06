@@ -32,7 +32,7 @@ jobs:
         #DATABASE_URL: ${{ secrets.DATABASE_URL }}
         RENDER_API_URL: ${{ secrets.RENDER_API_URL }}
       run: |
-        python scraper/educarriere_scraper.py
+        python educarriere_scraper.py
 
     - name: Push scraped data to API
       run: |
