@@ -29,7 +29,6 @@ jobs:
     - name: Run scraper
       env:
         API_KEY: ${{ secrets.SCRAPER_API_KEY }}
-        #DATABASE_URL: ${{ secrets.DATABASE_URL }}
         RENDER_API_URL: ${{ secrets.RENDER_API_URL }}
       run: |
         python scraper/educarriere_scraper.py
