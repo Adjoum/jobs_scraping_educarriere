@@ -96,6 +96,33 @@ def get_stats(db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur lors de la récupération des statistiques: {str(e)}")
 
+@app.get("/db-stats")
+def get_db_stats(db: Session = Depends(get_db)):
+    """Renvoie des statistiques sur la base de données"""
+    stats = {
+        "total_jobs": db.query(func.count(JobOffer.id)).scalar(),
+        "newest_job": db.query(JobOffer).order_by(desc(JobOffer.date_added)).first(),
+        "last_update": db.query(func.max(JobOffer.date_added)).scalar(),
+        "job_types": {
+            type_name: count for type_name, count in 
+            db.query(JobOffer.type, func.count(JobOffer.id)).group_by(JobOffer.type).all()
+        }
+    }
+    
+    if stats["newest_job"]:
+        stats["newest_job"] = {
+            "id": stats["newest_job"].id,
+            "title": stats["newest_job"].title,
+            "added_on": stats["newest_job"].date_added.isoformat() if stats["newest_job"].date_added else None
+        }
+    
+    return stats
+
+@app.get("/latest-jobs")
+def get_latest_jobs(limit: int = 10, db: Session = Depends(get_db)):
+    """Renvoie les dernières offres ajoutées à la base de données"""
+    latest_jobs = db.query(JobOffer).order_by(desc(JobOffer.date_added), desc(JobOffer.id)).limit(limit).all()
+    return latest_jobs
 
 # Point de terminaison pour récupérer les valeurs distinctes (pour les filtres)
 @app.get("/filter-values/{field}")
@@ -233,19 +260,26 @@ def health_check():
 @app.post("/import")
 async def import_jobs(jobs: List[JobOfferCreate], db: Session = Depends(get_db)):
     """Importe des nouvelles offres d'emploi dans la base de données"""
+    import logging
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
+    
+    logger.info(f"Tentative d'importation de {len(jobs)} offres")
     imported_count = 0
+    
     for job_data in jobs:
-        # Vérifier si l'offre existe déjà
         existing = db.query(JobOffer).filter(JobOffer.offer_id == job_data.offer_id).first()
         if not existing:
-            # Créer une nouvelle offre
             new_job = JobOffer(**job_data.dict(), date_added=datetime.datetime.now().date())
             db.add(new_job)
             imported_count += 1
-
-    # Valider les changements
+            logger.info(f"Nouvelle offre importée: {job_data.title}")
+    
     db.commit()
+    logger.info(f"Importation terminée: {imported_count} nouvelles offres ajoutées")
+    
     return {"status": "success", "imported_count": imported_count}
+
 # Ajouter des données de test si la base est vide
 #@app.on_event("startup")
 def add_test_data():
