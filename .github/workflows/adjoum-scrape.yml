@@ -37,12 +37,17 @@ jobs:
         
     - name: Push scraped data to API
       run: |
-        # Cette étape envoie les données scrapées à votre API Render
-        # Si vous utilisez SQLite, vous pouvez ajouter un script pour mettre à jour la base de données distante
         today=$(date +'%Y-%m-%d')
         if [ -f "educarriere_data/educarriere_jobs_${today}.json" ]; then
           echo "Sending new jobs to API..."
-          curl -X POST -H "Content-Type: application/json" -d @"educarriere_data/educarriere_jobs_${today}.json" ${{ secrets.RENDER_API_URL }}/import
+          response=$(curl -X POST -H "Content-Type: application/json" -d @"educarriere_data/educarriere_jobs_${today}.json" ${{ secrets.RENDER_API_URL }}/import)
+          echo "API response: $response"
+          
+          # Extraire le nombre d'offres importées avec jq (installer d'abord jq si nécessaire)
+          apt-get update && apt-get install -y jq
+          imported_count=$(echo $response | jq -r '.imported_count')
+          echo "::set-output name=imported_count::$imported_count"
+          echo "$imported_count nouvelles offres ajoutées à la base de données"
         else
           echo "No new jobs found today."
         fi
